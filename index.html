@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliGrid: AI-Powered Microgrid Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a fixed left-sidebar for navigation. This structure allows users to explore different aspects of the project (Problem, Solution, Live Demo, Architecture) in a non-linear fashion, which is more engaging than a simple scroll. The centerpiece is a simulated 'Live Demo' dashboard, which makes the project's value proposition tangible by allowing users to interactively switch between stakeholder views (Operator, Government, Citizen) and see relevant data visualizations update in real-time. This user-centric, interactive dashboard approach was chosen to effectively communicate the core functionality and impact of the IntelliGrid system. -->
+    <!-- Visualization & Content Choices: The application uses a mix of static and dynamic elements. 'The Challenge' is presented using info cards for scannability. The 'Architecture' is visualized as an interactive flowchart built with HTML/CSS to explain the technical flow. The core 'Live Demo' uses Chart.js to create dynamic, responsive line and doughnut charts simulating real-time energy flow and battery status. Buttons allow users to switch roles, which dynamically updates the charts and text content. This interaction directly demonstrates the 'role-based dashboard' feature, making an abstract concept concrete and understandable. All visualizations are built with Canvas via Chart.js, and diagrams are pure HTML/CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #10b981; /* emerald-500 */
+            color: white;
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .kpi-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .arch-box {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #d6d3d1;
+        }
+        .arch-box:hover {
+            background-color: #ecfdf5;
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-white shadow-md fixed h-full hidden lg:block">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-emerald-700">IntelliGrid</h1>
+                <p class="text-sm text-slate-500">Smart Monitoring System</p>
+            </div>
+            <nav class="mt-6">
+                <a href="#overview" class="nav-link active flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">🌍</span> Overview
+                </a>
+                <a href="#challenge" class="nav-link flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">⚠️</span> The Challenge
+                </a>
+                <a href="#solution" class="nav-link flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">💡</span> The Solution
+                </a>
+                <a href="#demo" class="nav-link flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">📊</span> Live Demo
+                </a>
+                <a href="#architecture" class="nav-link flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">🏗️</span> Architecture
+                </a>
+                <a href="#stack" class="nav-link flex items-center py-3 px-6 text-slate-600 hover:bg-emerald-50">
+                    <span class="mr-3">🛠️</span> Tech Stack
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 lg:ml-64 p-4 md:p-8">
+            <header class="lg:hidden mb-6">
+                 <h1 class="text-3xl font-bold text-emerald-700">IntelliGrid</h1>
+                 <p class="text-md text-slate-500">Smart Monitoring System</p>
+                 <select id="mobile-nav" class="mt-4 w-full p-2 border rounded-md bg-white">
+                    <option value="#overview">Overview</option>
+                    <option value="#challenge">The Challenge</option>
+                    <option value="#solution">The Solution</option>
+                    <option value="#demo">Live Demo</option>
+                    <option value="#architecture">Architecture</option>
+                    <option value="#stack">Tech Stack</option>
+                 </select>
+            </header>
+
+            <div id="overview" class="content-section active">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-4">AI-Powered Monitoring & Predictive Maintenance for Microgrids</h2>
+                    <p class="text-lg text-slate-600 mb-6">Welcome to IntelliGrid, an IoT and AI-based system designed to create a transparent, resilient, and optimized microgrid ecosystem. We address the critical challenges in microgrid operation by moving from a reactive to a predictive model, ensuring reliability and efficiency for all stakeholders.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                            <h3 class="text-xl font-semibold mb-2 text-red-800">The Problem</h3>
+                            <p class="text-red-700">Current microgrids operate with significant blind spots: no real-time data, reactive maintenance, unoptimized energy usage, and fragmented information. This leads to an unreliable, inefficient, and opaque energy network.</p>
+                        </div>
+                        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
+                            <h3 class="text-xl font-semibold mb-2 text-emerald-800">Our Solution</h3>
+                            <p class="text-emerald-700">IntelliGrid brings intelligence to the edge. Through continuous real-time monitoring, AI-driven predictive intelligence, and unified dashboards, we provide a single source of truth for operators, government, and citizens.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="challenge" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">The Challenge: Operating in the Dark</h2>
+                    <p class="text-lg text-slate-600 mb-8">Microgrids hold immense promise, but their potential is hampered by several foundational challenges. These issues lead to higher operational costs, longer downtimes, and a lack of trust among stakeholders. IntelliGrid is designed to address each of these pain points directly.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="kpi-card bg-stone-50 p-6 rounded-lg text-center border">
+                            <h3 class="text-xl font-semibold mb-2">No Real-Time Data</h3>
+                            <p class="text-slate-600">Operators react to failures after they happen, leading to prolonged and costly outages.</p>
+                        </div>
+                        <div class="kpi-card bg-stone-50 p-6 rounded-lg text-center border">
+                            <h3 class="text-xl font-semibold mb-2">Reactive Maintenance</h3>
+                            <p class="text-slate-600">Faults are found only during breakdowns, dramatically increasing repair time and costs.</p>
+                        </div>
+                        <div class="kpi-card bg-stone-50 p-6 rounded-lg text-center border">
+                            <h3 class="text-xl font-semibold mb-2">Unoptimized Usage</h3>
+                            <p class="text-slate-600">Poor battery management shortens equipment lifespan and wastes renewable energy.</p>
+                        </div>
+                        <div class="kpi-card bg-stone-50 p-6 rounded-lg text-center border">
+                            <h3 class="text-xl font-semibold mb-2">Fragmented Info</h3>
+                            <p class="text-slate-600">Data silos prevent collaboration between operators, government, and citizens.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="solution" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">The Solution: Intelligence & Transparency</h2>
+                    <p class="text-lg text-slate-600 mb-8">IntelliGrid is built on three core pillars that work together to create a smarter energy network. By combining real-time data with predictive AI, we empower stakeholders with the actionable insights needed for efficient and reliable grid management.</p>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
+                             <h3 class="text-xl font-semibold text-emerald-800 mb-2">Real-Time Monitoring</h3>
+                             <p class="text-emerald-700">Provides a live, comprehensive visualization of energy flow, load, generation, and overall grid health parameters.</p>
+                        </div>
+                        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
+                             <h3 class="text-xl font-semibold text-emerald-800 mb-2">AI-Driven Predictions</h3>
+                             <p class="text-emerald-700">Forecasts energy generation and demand while predicting component failures before they occur, enabling proactive maintenance.</p>
+                        </div>
+                        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
+                             <h3 class="text-xl font-semibold text-emerald-800 mb-2">Unified Dashboards</h3>
+                             <p class="text-emerald-700">Delivers a single, role-based source of truth for all stakeholders, from grid operators to government officials and citizens.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="demo" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">Live Microgrid Dashboard (Simulated)</h2>
+                    <p class="text-lg text-slate-600 mb-6">This interactive demo showcases the role-based dashboards that form the core of the IntelliGrid experience. Select a stakeholder view to see how the information is tailored to their specific needs. The data is updated in real-time to simulate a live grid environment.</p>
+                    <div class="flex justify-center space-x-2 mb-8 bg-stone-100 p-2 rounded-lg max-w-md mx-auto">
+                        <button id="operator-btn" class="role-btn w-full py-2 px-4 rounded-md bg-emerald-500 text-white font-semibold">Operator</button>
+                        <button id="gov-btn" class="role-btn w-full py-2 px-4 rounded-md">Government</button>
+                        <button id="citizen-btn" class="role-btn w-full py-2 px-4 rounded-md">Citizen</button>
+                    </div>
+
+                    <div id="dashboard-content">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="kpi-card bg-white p-6 rounded-lg shadow-sm border text-center">
+                                <p class="text-sm text-slate-500">Total Generation</p>
+                                <p id="generation-stat" class="text-3xl font-bold text-emerald-600">-- kW</p>
+                            </div>
+                            <div class="kpi-card bg-white p-6 rounded-lg shadow-sm border text-center">
+                                <p class="text-sm text-slate-500">Current Load</p>
+                                <p id="load-stat" class="text-3xl font-bold text-orange-500">-- kW</p>
+                            </div>
+                            <div class="kpi-card bg-white p-6 rounded-lg shadow-sm border text-center">
+                                <p class="text-sm text-slate-500">Grid Status</p>
+                                <p id="status-stat" class="text-3xl font-bold text-green-600">Nominal</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 bg-stone-50 p-4 rounded-lg border">
+                                <h3 id="main-chart-title" class="text-center font-semibold mb-2">Energy Flow (kW)</h3>
+                                <div class="chart-container h-[40vh] md:h-96">
+                                    <canvas id="energyChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-6">
+                                <div class="bg-stone-50 p-4 rounded-lg border flex-1">
+                                    <h3 class="text-center font-semibold mb-2">Battery SOC</h3>
+                                    <div class="chart-container h-48 md:h-full">
+                                        <canvas id="batteryChart"></canvas>
+                                    </div>
+                                </div>
+                                <div id="alerts-panel" class="bg-stone-50 p-4 rounded-lg border flex-1">
+                                    <h3 class="text-center font-semibold mb-2">System Alerts</h3>
+                                    <div id="alerts-log" class="text-sm bg-white h-32 overflow-y-auto p-2 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="architecture" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">End-to-End System Architecture</h2>
+                    <p class="text-lg text-slate-600 mb-8">Our system is built on a robust, layered architecture that ensures scalability, security, and real-time performance. Data flows seamlessly from physical sensors at the edge to our cloud processing pipeline, where AI models generate actionable insights that are delivered to users through tailored visualizations and alerts.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center items-start">
+                        <div class="p-2">
+                            <h3 class="font-bold text-lg mb-4">1. Edge Layer</h3>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">IoT Sensors</p>
+                                <p class="text-xs text-slate-500">(Voltage, Current, Temp)</p>
+                            </div>
+                            <div class="my-2">↓</div>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">Edge Gateway</p>
+                                <p class="text-xs text-slate-500">(ESP32/RPi)</p>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <h3 class="font-bold text-lg mb-4">2. Cloud Layer</h3>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">Backend API</p>
+                                <p class="text-xs text-slate-500">(Flask/FastAPI)</p>
+                            </div>
+                            <div class="my-2">↓</div>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">Databases</p>
+                                <p class="text-xs text-slate-500">(InfluxDB & PostgreSQL)</p>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <h3 class="font-bold text-lg mb-4">3. AI/ML Pipeline</h3>
+                             <div class="arch-box p-4 rounded-lg bg-stone-50 h-full flex flex-col justify-center">
+                                <p class="font-semibold">Intelligence Models</p>
+                                <p class="text-xs text-slate-500">(Anomaly Detection, Forecasting, Predictive Maintenance)</p>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <h3 class="font-bold text-lg mb-4">4. Visualization & Alerts</h3>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">Dashboards</p>
+                                <p class="text-xs text-slate-500">(React/Grafana)</p>
+                            </div>
+                            <div class="my-2">↓</div>
+                            <div class="arch-box p-4 rounded-lg bg-stone-50">
+                                <p class="font-semibold">Notifications</p>
+                                <p class="text-xs text-slate-500">(SMS/Push)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="stack" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">Technology Stack</h2>
+                    <p class="text-lg text-slate-600 mb-8">We use a modern, scalable, and robust tech stack to build IntelliGrid, ensuring high performance and reliability. Each component is chosen for its suitability for real-time data processing, machine learning, and interactive visualization.</p>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">IoT & Edge</h3>
+                            <div class="flex flex-wrap gap-4">
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">ESP32</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Raspberry Pi</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">MQTT</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">Backend & Database</h3>
+                            <div class="flex flex-wrap gap-4">
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Flask/FastAPI</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">InfluxDB</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">PostgreSQL</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">AI/ML Frameworks</h3>
+                            <div class="flex flex-wrap gap-4">
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">TensorFlow/Keras</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Scikit-learn</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">Frontend & Alerts</h3>
+                            <div class="flex flex-wrap gap-4">
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">React.js</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Grafana</span>
+                                 <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Chart.js</span>
+                                <span class="bg-stone-100 py-2 px-4 rounded-full text-slate-700">Twilio (SMS)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+            const contentSections = document.querySelectorAll('.content-section');
+            let energyChart, batteryChart;
+            let simulationInterval;
+            let currentView = 'operator';
+
+            const chartData = {
+                labels: Array.from({ length: 10 }, (_, i) => `T-${9-i}`),
+                generation: [150, 160, 180, 220, 250, 240, 230, 210, 190, 170],
+                load: [180, 185, 190, 195, 200, 210, 205, 200, 195, 190],
+                batterySOC: 75,
+                renewableContribution: 85,
+            };
+
+            const alerts = [
+                { time: '14:32:10', msg: 'INFO: Grid status nominal.' },
+                { time: '14:31:55', msg: 'WARN: Inverter B temperature threshold reached: 78°C.' },
+                { time: '14:31:40', msg: 'INFO: Battery charging initiated.' },
+                { time: '14:30:12', msg: 'INFO: Solar generation increasing.' }
+            ];
+
+            function navigate(hash) {
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                contentSections.forEach(section => {
+                    if ('#' + section.id === hash) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                if (hash === '#demo') {
+                    initOrUpdateDashboard();
+                    startSimulation();
+                } else {
+                    stopSimulation();
+                }
+                 mobileNav.value = hash;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    navigate(targetId);
+                    window.location.hash = targetId;
+                });
+            });
+
+            mobileNav.addEventListener('change', (e) => {
+                 navigate(e.target.value);
+                 window.location.hash = e.target.value;
+            });
+
+            function initEnergyChart() {
+                const ctx = document.getElementById('energyChart').getContext('2d');
+                energyChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: []
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Power (kW)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                        },
+                        interaction: {
+                           intersect: false,
+                           mode: 'index',
+                        },
+                    }
+                });
+            }
+
+            function initBatteryChart() {
+                const ctx = document.getElementById('batteryChart').getContext('2d');
+                batteryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Charged', 'Remaining'],
+                        datasets: [{
+                            data: [chartData.batterySOC, 100 - chartData.batterySOC],
+                            backgroundColor: ['#10b981', '#e5e7eb'],
+                            borderColor: ['#ffffff'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                         plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false },
+                        }
+                    }
+                });
+            }
+
+            function updateDashboardView() {
+                const mainChartTitle = document.getElementById('main-chart-title');
+                const alertsPanel = document.getElementById('alerts-panel');
+
+                const operatorDatasets = [
+                    {
+                        label: 'Generation',
+                        data: chartData.generation,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Load',
+                        data: chartData.load,
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ];
+
+                const govDatasets = [{
+                    label: 'Renewable Contribution %',
+                    data: Array(10).fill(chartData.renewableContribution),
+                    type: 'bar',
+                    backgroundColor: '#34d399',
+                }];
+
+                const citizenDatasets = [{
+                    label: 'Green Energy Generation',
+                    data: chartData.generation,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }];
+                
+                energyChart.options.scales.y.title.text = 'Power (kW)';
+
+                if (currentView === 'operator') {
+                    mainChartTitle.textContent = 'Energy Flow (kW)';
+                    energyChart.config.type = 'line';
+                    energyChart.data.datasets = operatorDatasets;
+                    alertsPanel.style.display = 'block';
+                } else if (currentView === 'government') {
+                    mainChartTitle.textContent = 'Renewable Contribution';
+                    energyChart.options.scales.y.title.text = 'Percentage (%)';
+                    energyChart.config.type = 'bar';
+                    energyChart.data.datasets = govDatasets;
+                    alertsPanel.style.display = 'none';
+                } else if (currentView === 'citizen') {
+                    mainChartTitle.textContent = 'Green Energy Generation (kW)';
+                    energyChart.config.type = 'line';
+                    energyChart.data.datasets = citizenDatasets;
+                    alertsPanel.style.display = 'none';
+                }
+                energyChart.update();
+            }
+
+            function initOrUpdateDashboard() {
+                if (!energyChart) initEnergyChart();
+                if (!batteryChart) initBatteryChart();
+                updateDashboardView();
+                updateStats();
+                updateAlerts();
+            }
+
+            function updateStats() {
+                const lastGen = chartData.generation[chartData.generation.length - 1];
+                const lastLoad = chartData.load[chartData.load.length - 1];
+                document.getElementById('generation-stat').textContent = `${lastGen.toFixed(1)} kW`;
+                document.getElementById('load-stat').textContent = `${lastLoad.toFixed(1)} kW`;
+                document.getElementById('status-stat').textContent = lastGen > lastLoad ? 'Nominal' : 'High Load';
+                document.getElementById('status-stat').style.color = lastGen > lastLoad ? '#16a34a' : '#ea580c';
+            }
+
+             function updateAlerts() {
+                const logEl = document.getElementById('alerts-log');
+                logEl.innerHTML = alerts.map(a => `<p><span class="font-mono text-slate-500">${a.time}</span>: ${a.msg}</p>`).join('');
+            }
+            
+            function simulateData() {
+                const lastGen = chartData.generation[chartData.generation.length - 1];
+                const lastLoad = chartData.load[chartData.load.length - 1];
+                
+                const newGen = Math.max(100, lastGen + (Math.random() - 0.5) * 20);
+                const newLoad = Math.max(150, lastLoad + (Math.random() - 0.5) * 5);
+                
+                chartData.generation.shift();
+                chartData.generation.push(newGen);
+                chartData.load.shift();
+                chartData.load.push(newLoad);
+
+                if (newGen > newLoad) {
+                    chartData.batterySOC = Math.min(100, chartData.batterySOC + 0.2);
+                } else {
+                    chartData.batterySOC = Math.max(0, chartData.batterySOC - 0.2);
+                }
+                
+                chartData.labels.shift();
+                const now = new Date();
+                chartData.labels.push(`${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`);
+
+                energyChart.update();
+                batteryChart.data.datasets[0].data = [chartData.batterySOC, 100 - chartData.batterySOC];
+                batteryChart.update();
+                updateStats();
+            }
+            
+            function startSimulation() {
+                if (!simulationInterval) {
+                    simulationInterval = setInterval(simulateData, 2000);
+                }
+            }
+
+            function stopSimulation() {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+
+            const roleButtons = document.querySelectorAll('.role-btn');
+            roleButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    roleButtons.forEach(b => b.classList.remove('bg-emerald-500', 'text-white', 'font-semibold'));
+                    this.classList.add('bg-emerald-500', 'text-white', 'font-semibold');
+                    currentView = this.id.split('-')[0];
+                    updateDashboardView();
+                });
+            });
+
+            const initialHash = window.location.hash || '#overview';
+            navigate(initialHash);
+        });
+    </script>
+</body>
+</html>
